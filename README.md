@@ -23,18 +23,19 @@ Structure follows **Checklist 2 – For New Build Requests and Proposals**, so t
 
 | Field | Answer |
 |---|---|
-| **Data source** | A hand-maintained `LINKS` list at the bottom of `index.html`. Each entry has a title, short description, category and URL. No database, no API, no client data. |
+| **Data source** | A hand-maintained `SECTIONS` list in `index.html`. Each section holds tools with a title and URL, plus an optional priority, "when to use" note and description. No database, no API, no client data. |
 | **Trigger / frequency** | On demand. Staff open the page when they need a tool. The list is updated whenever a new tool is approved or a link changes. |
-| **Core logic** | Group links by category, filter by category chip, and search across title, description, category and website. Links open in a new tab. |
+| **Core logic** | Show every tool inside one big card, grouped into sections. Sections with more than one tool collapse and expand. Filter by section chip, and search across titles, descriptions, "when to use" notes and websites. Links open in a new tab. |
 | **Output & delivery** | A single static page hosted on GitHub Pages. Works on desktop and phone, with light and dark themes. |
 | **Edge cases** | See below. |
 
 ### Edge cases
 
 - **Session-token links.** The DMV calculator link contains a `csrt=` code that may expire. If it stops working, replace it with the plain calculator address.
+- **Year-specific links.** The Schedule CA Instructions link points to the 2025 booklet. Update it each filing season.
 - **Moved or retired pages.** Government sites reorganize. A dead link should be fixed or removed in the same commit that finds it.
 - **No sensitive data.** The page never asks for or stores client information. The only thing saved in the browser is the light/dark theme choice.
-- **Category sprawl.** A new category name creates a new group automatically. Reuse existing categories where possible.
+- **Section sprawl.** Keep sections to a handful. Add a new section only when a tool does not fit an existing one.
 - **Empty search.** Shows a "no tools match" message with a hint to try a shorter word.
 
 ---
@@ -52,20 +53,19 @@ Structure follows **Checklist 2 – For New Build Requests and Proposals**, so t
 
 ## Using it
 
-### Add a link
+### Add a tool
 
-1. Open `index.html` and find the `LINKS` list.
-2. Copy an existing entry and change the text. Keep the commas.
+1. Open `index.html` and find the `SECTIONS` list.
+2. Copy one line inside a section's `links` list and change the text. Keep the commas.
 3. Commit the change.
 
 ```js
-{
-  title: "Tool name",
-  desc: "One line on what it is used for.",
-  category: "Category name",
-  url: "https://example.com/"
-},
+{ priority: 11, title: "Tool name", when: "When to use it", desc: "One line about what it is.", url: "https://example.com/" },
 ```
+
+Only `title` and `url` are required. `priority` sets the order inside a section (1 first). `when` shows as a tag on the right. `desc` shows under the name.
+
+To add a new section, copy a whole block that starts with `title:` and give it a new name. Everything stays inside the one big card.
 
 ### Publish on GitHub Pages
 
@@ -83,12 +83,13 @@ Structure follows **Checklist 2 – For New Build Requests and Proposals**, so t
 
 ## Tools on the page today
 
-| Tool | Category |
+| Section | Tools |
 |---|---|
-| California DMV Vehicle License Fee Calculator | Vehicles & DMV |
-| Form 1095 Decoder | Forms & Decoders |
-| FTB Tax Calculator, Tables and Rates | California Tax (FTB) |
-| Treasury Currency Exchange Rates Converter | Currency |
+| Tax Research | 10, in priority order: FTB Forms & Publications, FTB Personal Filing, FTB Personal Credits, Schedule CA Instructions, IRS Schedule C Instructions, IRS Pubs 334, 463, 587 and 946, FTB PTET |
+| California Tax (FTB) | FTB Tax Calculator, Tables and Rates |
+| Vehicles & DMV | California DMV Vehicle License Fee Calculator |
+| Forms & Decoders | Form 1095 Decoder |
+| Currency | Treasury Currency Exchange Rates Converter |
 
 ## Maintenance
 
