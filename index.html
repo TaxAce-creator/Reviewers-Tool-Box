@@ -1,257 +1,96 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Reviewers Tool Box</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400;500;700;800&display=swap" rel="stylesheet">
-<style>
-  :root {
-    box-sizing: border-box;
-    padding-top: env(safe-area-inset-top, 0px);
-    padding-bottom: env(safe-area-inset-bottom, 0px);
-    --bg: #eef1f5;
-    --panel: #ffffff;
-    --ink: #15233b;
-    --muted: #5b6a82;
-    --line: #d5dce6;
-    --accent: #0d6b57;
-    --accent-ink: #ffffff;
-    --accent-soft: #dff1ec;
-    --focus: #1f5fd1;
-    --font: "Schibsted Grotesk", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
-  }
-  @media (prefers-color-scheme: dark) {
-    :root:not([data-theme="light"]) {
-      --bg: #101722;
-      --panel: #19222f;
-      --ink: #e8edf5;
-      --muted: #9aa8bd;
-      --line: #2b3748;
-      --accent: #4fc3a6;
-      --accent-ink: #08201a;
-      --accent-soft: #17332d;
-      --focus: #7aa7ff;
-    }
-  }
-  :root[data-theme="dark"] {
-    --bg: #101722;
-    --panel: #19222f;
-    --ink: #e8edf5;
-    --muted: #9aa8bd;
-    --line: #2b3748;
-    --accent: #4fc3a6;
-    --accent-ink: #08201a;
-    --accent-soft: #17332d;
-    --focus: #7aa7ff;
-  }
-  html { scroll-padding-top: env(safe-area-inset-top, 0px); }
-  *, *::before, *::after { box-sizing: inherit; }
-  body {
-    margin: 0;
-    background: var(--bg);
-    color: var(--ink);
-    font-family: var(--font);
-    font-size: 16px;
-    line-height: 1.5;
-    -webkit-font-smoothing: antialiased;
-  }
-  a { color: inherit; }
-  :focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; border-radius: 6px; }
+# Reviewers Tool Box
 
-  .shell { max-width: 1040px; margin: 0 auto; padding: 28px 20px 56px; }
+One page where Tax Inputters and Tax Reviewers find every outside tool and link we use for taxes.
 
-  header { display: flex; flex-wrap: wrap; align-items: end; justify-content: space-between; gap: 16px; margin-bottom: 22px; }
-  h1 { font-size: clamp(2rem, 5vw, 3rem); line-height: 1.05; font-weight: 800; letter-spacing: -0.03em; margin: 0; }
-  .sub { color: var(--muted); margin: 6px 0 0; max-width: 46ch; }
+Structure follows **Checklist 2 – For New Build Requests and Proposals**, so this README can double as the build request.
 
-  .search { position: relative; flex: 1 1 280px; max-width: 380px; }
-  .search input {
-    width: 100%; font: inherit; color: var(--ink);
-    background: var(--panel); border: 2px solid var(--line); border-radius: 10px;
-    padding: 12px 44px 12px 14px;
-  }
-  .search input::placeholder { color: var(--muted); }
-  .search input:focus { border-color: var(--accent); outline: none; }
-  .search kbd {
-    position: absolute; right: 12px; top: 50%; transform: translateY(-50%);
-    font: 500 0.8rem var(--font); color: var(--muted);
-    border: 1px solid var(--line); border-radius: 5px; padding: 1px 7px; background: var(--bg);
-  }
+---
 
-  .filters { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 22px; }
-  .chip {
-    font: 500 0.95rem var(--font); color: var(--ink); cursor: pointer;
-    background: var(--panel); border: 2px solid var(--line); border-radius: 999px; padding: 6px 14px;
-  }
-  .chip:hover { border-color: var(--accent); }
-  .chip[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
-  .chip .n { opacity: 0.7; margin-left: 6px; font-weight: 400; }
+## Already required by the existing form
 
-  .group { margin-bottom: 30px; }
-  .group h2 { font-size: 1.15rem; font-weight: 700; margin: 0 0 10px; display: flex; align-items: baseline; gap: 10px; }
-  .group h2 span { color: var(--muted); font-weight: 400; font-size: 0.95rem; }
+| Field | Answer |
+|---|---|
+| **Name / Project Name** | Reviewers Tool Box |
+| **Submitted by** | Vena, Research & Evaluation Lead |
+| **Team** | Used by Tax Inputters and Tax Reviewers. Add any co-owners here: _TBD_ |
+| **Priority** | _TBD – suggested P3 Normal (convenience tool, nothing blocked without it)_ |
+| **Current problem (why it matters)** | Outside tools such as the DMV fee calculator, the Form 1095 decoder, and the Treasury and FTB rate pages live in individual bookmarks, chats and memory. People lose time hunting for them, and different people end up using different sources for the same lookup. |
+| **Expected outcome / success measure** | Everyone opens one page and finds the approved tool in seconds. Success looks like: no more "what's the link for…?" questions in Slack, and every tool on the team's approved list appears on the page. |
 
-  .list { background: var(--panel); border: 2px solid var(--line); border-radius: 14px; overflow: hidden; }
-  .row {
-    display: grid; grid-template-columns: 44px 1fr auto; align-items: center; gap: 14px;
-    padding: 14px 16px; text-decoration: none; border-top: 1px solid var(--line);
-  }
-  .row:first-child { border-top: 0; }
-  .row:hover { background: var(--accent-soft); }
-  .mark {
-    width: 44px; height: 44px; border-radius: 10px; display: grid; place-items: center;
-    background: var(--accent); color: var(--accent-ink); font-weight: 800; font-size: 1.05rem; letter-spacing: -0.02em;
-  }
-  .title { font-weight: 700; font-size: 1.05rem; line-height: 1.25; }
-  .desc { color: var(--muted); font-size: 0.93rem; margin-top: 2px; max-width: 70ch; }
-  .host { color: var(--muted); font-size: 0.82rem; margin-top: 2px; }
-  .open { font-weight: 700; font-size: 0.9rem; color: var(--accent); white-space: nowrap; }
-  .row:hover .open { text-decoration: underline; }
+---
 
-  .empty { text-align: center; color: var(--muted); padding: 40px 12px; border: 2px dashed var(--line); border-radius: 14px; }
+## The full spec
 
-  footer { margin-top: 36px; color: var(--muted); font-size: 0.9rem; display: flex; justify-content: space-between; flex-wrap: wrap; gap: 10px; }
-  .theme { font: inherit; color: var(--muted); background: none; border: 1px solid var(--line); border-radius: 8px; padding: 4px 12px; cursor: pointer; }
+| Field | Answer |
+|---|---|
+| **Data source** | A hand-maintained `SECTIONS` list in `index.html`. Each section holds tools with a title and URL, plus an optional priority, "when to use" note and description. No database, no API, no client data. |
+| **Trigger / frequency** | On demand. Staff open the page when they need a tool. The list is updated whenever a new tool is approved or a link changes. |
+| **Core logic** | Show every tool inside one big card, grouped into sections. Sections with more than one tool collapse and expand. Filter by section chip, and search across titles, descriptions, "when to use" notes and websites. Links open in a new tab. |
+| **Output & delivery** | A single static page hosted on GitHub Pages. Works on desktop and phone, with light and dark themes. |
+| **Edge cases** | See below. |
 
-  @media (max-width: 560px) {
-    .row { grid-template-columns: 40px 1fr; }
-    .open { display: none; }
-    .mark { width: 40px; height: 40px; }
-  }
-  @media (prefers-reduced-motion: no-preference) {
-    .row, .chip { transition: background-color 0.12s, border-color 0.12s; }
-  }
-</style>
-</head>
-<body>
-<div class="shell">
-  <header>
-    <div>
-      <h1>Reviewers Tool Box</h1>
-      <p class="sub">Every outside tool and link the team uses for tax prep and review, in one place.</p>
-    </div>
-    <div class="search">
-      <input id="q" type="search" placeholder="Search tools" aria-label="Search tools" autocomplete="off">
-      <kbd aria-hidden="true">/</kbd>
-    </div>
-  </header>
+### Edge cases
 
-  <nav class="filters" id="filters" aria-label="Filter by category"></nav>
-  <main id="out"></main>
+- **Session-token links.** The DMV calculator link contains a `csrt=` code that may expire. If it stops working, replace it with the plain calculator address.
+- **Year-specific links.** The Schedule CA Instructions link points to the 2025 booklet. Update it each filing season.
+- **Moved or retired pages.** Government sites reorganize. A dead link should be fixed or removed in the same commit that finds it.
+- **No sensitive data.** The page never asks for or stores client information. The only thing saved in the browser is the light/dark theme choice.
+- **Section sprawl.** Keep sections to a handful. Add a new section only when a tool does not fit an existing one.
+- **Empty search.** Shows a "no tools match" message with a hint to try a shorter word.
 
-  <footer>
-    <span id="count"></span>
-    <button class="theme" id="theme" type="button">Switch theme</button>
-  </footer>
-</div>
+---
 
-<script>
-/* ------------------------------------------------------------------
-   TO ADD A LINK: copy one line below, change the text, keep the commas.
-   category: any name. Links with the same category are grouped together.
-------------------------------------------------------------------- */
-const LINKS = [
-  {
-    title: "California DMV Vehicle License Fee Calculator",
-    desc: "Estimate the VLF and registration fees for a California vehicle.",
-    category: "Vehicles & DMV",
-    url: "https://www.dmv.ca.gov/wasapp/FeeCalculatorWeb/vlfForm.do?csrt=14926755158816426428"
-  },
-  {
-    title: "Form 1095 Decoder",
-    desc: "Decode the codes on Form 1095-A, B and C.",
-    category: "Forms & Decoders",
-    url: "https://www.mytaxform.com/form-1095-decoder/"
-  },
-  {
-    title: "FTB Tax Calculator, Tables and Rates",
-    desc: "California Franchise Tax Board personal income tax calculator, tax tables and rates.",
-    category: "California Tax (FTB)",
-    url: "https://www.ftb.ca.gov/file/personal/tax-calculator-tables-rates.asp"
-  },
-  {
-    title: "Treasury Currency Exchange Rates Converter",
-    desc: "Official Treasury exchange rates for converting foreign currency amounts.",
-    category: "Currency",
-    url: "https://fiscaldata.treasury.gov/currency-exchange-rates-converter/"
-  }
-];
+## The overlap check
 
-const $ = (id) => document.getElementById(id);
-let activeCat = "All";
+| Field | Answer |
+|---|---|
+| **What was checked against** | TaxAce AI Hub (including the Stack Dashboard), the BSI dashboard suite (Reviewers and Inputters dashboards), and the Accounting Command Center. |
+| **Result** | _Possible overlap – to be confirmed._ The BSI dashboards already serve the same two groups and could host a link section. |
+| **Linked existing build** | If it turns out to extend one of the above, link it here: _TBD_ |
+| **Who else was asked** | _TBD – name who was consulted before submitting, especially Reviewers and Inputters who would use it._ |
 
-function hostOf(url) { try { return new URL(url).hostname.replace(/^www\./, ""); } catch (e) { return url; } }
-function initials(t) {
-  const w = t.replace(/[^A-Za-z0-9 ]/g, "").split(" ").filter(Boolean);
-  return ((w[0] || "?")[0] + ((w[1] || "")[0] || "")).toUpperCase();
-}
-function esc(s) { return String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c])); }
+---
 
-function renderFilters() {
-  const cats = ["All", ...Array.from(new Set(LINKS.map((l) => l.category)))];
-  $("filters").innerHTML = cats.map((c) => {
-    const n = c === "All" ? LINKS.length : LINKS.filter((l) => l.category === c).length;
-    return `<button class="chip" type="button" data-cat="${esc(c)}" aria-pressed="${c === activeCat}">${esc(c)}<span class="n">${n}</span></button>`;
-  }).join("");
-}
+## Using it
 
-function render() {
-  const q = $("q").value.trim().toLowerCase();
-  const shown = LINKS.filter((l) =>
-    (activeCat === "All" || l.category === activeCat) &&
-    (!q || (l.title + " " + (l.desc || "") + " " + l.category + " " + hostOf(l.url)).toLowerCase().includes(q))
-  );
-  const groups = {};
-  shown.forEach((l) => (groups[l.category] = groups[l.category] || []).push(l));
+### Add a tool
 
-  $("out").innerHTML = shown.length
-    ? Object.keys(groups).map((cat) => `
-        <section class="group">
-          <h2>${esc(cat)} <span>${groups[cat].length} ${groups[cat].length === 1 ? "tool" : "tools"}</span></h2>
-          <div class="list">
-            ${groups[cat].map((l) => `
-              <a class="row" href="${esc(l.url)}" target="_blank" rel="noopener noreferrer">
-                <div class="mark" aria-hidden="true">${esc(initials(l.title))}</div>
-                <div>
-                  <div class="title">${esc(l.title)}</div>
-                  ${l.desc ? `<div class="desc">${esc(l.desc)}</div>` : ""}
-                  <div class="host">${esc(hostOf(l.url))}</div>
-                </div>
-                <div class="open">Open tool</div>
-              </a>`).join("")}
-          </div>
-        </section>`).join("")
-    : `<div class="empty">No tools match "${esc($("q").value)}". Try a shorter word or pick All.</div>`;
+1. Open `index.html` and find the `SECTIONS` list.
+2. Copy one line inside a section's `links` list and change the text. Keep the commas.
+3. Commit the change.
 
-  $("count").textContent = `${shown.length} of ${LINKS.length} tools shown`;
-}
+```js
+{ priority: 11, title: "Tool name", when: "When to use it", desc: "One line about what it is.", url: "https://example.com/" },
+```
 
-$("filters").addEventListener("click", (e) => {
-  const b = e.target.closest(".chip");
-  if (!b) return;
-  activeCat = b.dataset.cat;
-  renderFilters();
-  render();
-});
-$("q").addEventListener("input", render);
-document.addEventListener("keydown", (e) => {
-  if (e.key === "/" && document.activeElement !== $("q")) { e.preventDefault(); $("q").focus(); }
-  if (e.key === "Escape" && document.activeElement === $("q")) { $("q").value = ""; render(); $("q").blur(); }
-});
+Only `title` and `url` are required. `priority` sets the order inside a section (1 first). `when` shows as a tag on the right. `desc` shows under the name.
 
-$("theme").addEventListener("click", () => {
-  const root = document.documentElement;
-  const dark = root.dataset.theme ? root.dataset.theme === "dark" : matchMedia("(prefers-color-scheme: dark)").matches;
-  root.dataset.theme = dark ? "light" : "dark";
-  try { localStorage.setItem("rtb-theme", root.dataset.theme); } catch (e) {}
-});
-try { const t = localStorage.getItem("rtb-theme"); if (t) document.documentElement.dataset.theme = t; } catch (e) {}
+To add a new section, copy a whole block that starts with `title:` and give it a new name. Everything stays inside the one big card.
 
-renderFilters();
-render();
-</script>
-</body>
-</html>
+### Publish on GitHub Pages
+
+1. Name the file `index.html` and push it to the repo.
+2. In the repo, go to **Settings → Pages**.
+3. Under **Build and deployment**, choose **Deploy from a branch**, pick `main` and `/ (root)`, then save.
+4. The page appears at `https://<org-or-user>.github.io/<repo>/` after a minute or two.
+
+### Keyboard shortcuts
+
+- `/` jumps to search.
+- `Esc` clears search.
+
+---
+
+## Tools on the page today
+
+| Section | Tools |
+|---|---|
+| Tax Research | 10, in priority order: FTB Forms & Publications, FTB Personal Filing, FTB Personal Credits, Schedule CA Instructions, IRS Schedule C Instructions, IRS Pubs 334, 463, 587 and 946, FTB PTET |
+| California Tax (FTB) | FTB Tax Calculator, Tables and Rates |
+| Vehicles & DMV | California DMV Vehicle License Fee Calculator |
+| Forms & Decoders | Form 1095 Decoder |
+| Currency | Treasury Currency Exchange Rates Converter |
+
+## Maintenance
+
+Owner: Research & Evaluation. Review the links on a regular schedule and remove anything that no longer works.
