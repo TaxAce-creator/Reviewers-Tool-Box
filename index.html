@@ -52,6 +52,33 @@
   .search input:focus { border-color: var(--accent); outline: none; }
   .search kbd { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); font: 500 0.8rem var(--font); color: var(--muted); border: 1px solid var(--line); border-radius: 5px; padding: 1px 7px; background: var(--bg); }
 
+
+  .add-btn { flex: none; font: 700 0.95rem var(--font); color: var(--accent-ink); background: var(--accent); border: 2px solid var(--accent); border-radius: 10px; padding: 11px 16px; cursor: pointer; }
+  .add-btn:hover { filter: brightness(1.08); }
+  .tools-row { display: flex; gap: 10px; flex: 1 1 340px; max-width: 520px; align-items: stretch; }
+  .tools-row .search { max-width: none; }
+
+  .add { background: var(--panel); border: 2px solid var(--accent); border-radius: 16px; padding: 18px; margin-bottom: 22px; }
+  .add[hidden] { display: none; }
+  .add h2 { margin: 0; font-size: 1.15rem; }
+  .add .hint { color: var(--muted); margin: 4px 0 14px; font-size: 0.93rem; }
+  .fields { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 12px; }
+  .fields label { display: block; font-size: 0.85rem; font-weight: 700; }
+  .fields label[hidden] { display: none; }
+  .fields input, .fields select { display: block; width: 100%; margin-top: 4px; font: 400 1rem var(--font); color: var(--ink); background: var(--bg); border: 2px solid var(--line); border-radius: 8px; padding: 9px 10px; }
+  .fields input:focus, .fields select:focus { border-color: var(--accent); outline: none; }
+  .actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 14px; }
+  .btn { font: 700 0.95rem var(--font); color: var(--ink); background: var(--panel); border: 2px solid var(--line); border-radius: 10px; padding: 9px 16px; cursor: pointer; text-decoration: none; display: inline-block; }
+  .btn:hover { border-color: var(--accent); }
+  .btn.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+  .result { margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--line); }
+  .result[hidden] { display: none; }
+  .result p { margin: 0 0 8px; font-size: 0.93rem; }
+  .result textarea { width: 100%; font: 0.85rem/1.5 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; color: var(--ink); background: var(--bg); border: 2px solid var(--line); border-radius: 8px; padding: 10px; resize: vertical; }
+  .err { color: #b3261e; font-weight: 700; font-size: 0.9rem; margin-top: 10px; }
+  :root[data-theme="dark"] .err { color: #ff8a80; }
+  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .err { color: #ff8a80; } }
+
   .filters { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 22px; }
   .chip { font: 500 0.95rem var(--font); color: var(--ink); cursor: pointer; background: var(--panel); border: 2px solid var(--line); border-radius: 999px; padding: 6px 14px; }
   .chip:hover { border-color: var(--accent); }
@@ -114,11 +141,41 @@
       <h1>Reviewers Tool Box</h1>
       <p class="sub">Every outside tool and link the team uses for tax prep and review, in one place.</p>
     </div>
-    <div class="search">
-      <input id="q" type="search" placeholder="Search tools" aria-label="Search tools" autocomplete="off">
-      <kbd aria-hidden="true">/</kbd>
+    <div class="tools-row">
+      <div class="search">
+        <input id="q" type="search" placeholder="Search tools" aria-label="Search tools" autocomplete="off">
+        <kbd aria-hidden="true">/</kbd>
+      </div>
+      <button class="add-btn" id="addToggle" type="button" aria-expanded="false" aria-controls="addPanel">+ Add a tool</button>
     </div>
   </header>
+
+  <section class="add" id="addPanel" hidden aria-label="Add a tool">
+    <h2>Add a tool</h2>
+    <p class="hint">Fill this in, copy the line it makes, and paste it into <code>index.html</code> on GitHub. After you commit, the page updates for everyone.</p>
+    <div class="fields">
+      <label>Tool name *<input id="fTitle" autocomplete="off"></label>
+      <label>Link *<input id="fUrl" type="url" placeholder="https://" autocomplete="off"></label>
+      <label>Section<select id="fSec"></select></label>
+      <label id="fNewWrap" hidden>New section name *<input id="fNew" autocomplete="off"></label>
+      <label>When to use (optional)<input id="fWhen" placeholder="e.g. Home office" autocomplete="off"></label>
+      <label>Description (optional)<input id="fDesc" autocomplete="off"></label>
+      <label>Priority (optional)<input id="fPri" type="number" min="1" autocomplete="off"></label>
+    </div>
+    <div class="err" id="fErr" role="alert" hidden></div>
+    <div class="actions">
+      <button class="btn primary" id="fMake" type="button">Make the line</button>
+      <button class="btn" id="fClose" type="button">Close</button>
+    </div>
+    <div class="result" id="fOut" hidden>
+      <p id="fWhere"></p>
+      <textarea id="fCode" rows="4" readonly aria-label="Line to paste"></textarea>
+      <div class="actions">
+        <button class="btn primary" id="fCopy" type="button">Copy</button>
+        <a class="btn" id="fGh" target="_blank" rel="noopener noreferrer" hidden>Open index.html on GitHub</a>
+      </div>
+    </div>
+  </section>
 
   <nav class="filters" id="filters" aria-label="Filter by category"></nav>
   <main id="out"></main>
@@ -138,15 +195,21 @@
      desc:     one line about what it is (optional)
      priority: number, 1 is used first (optional)
 
+   startClosed: true  (on a section with 2+ tools) keeps it folded when the page opens.
+
    TO ADD A SECTION: copy a whole block that starts with  title: "..."
    Everything sits inside the one big card.
 ------------------------------------------------------------------- */
+/* Optional: paste the link to edit this file on GitHub so the "Add a tool" panel
+   can open it for you. Example: https://github.com/YOUR-ORG/YOUR-REPO/edit/main/index.html */
+const REPO_EDIT_URL = "";
+
 const SECTIONS = [
   {
     title: "California Tax (FTB)",
-    desc: "California income tax rates, tables and calculator.",
+    desc: "California income tax calculator.",
     links: [
-      { title: "FTB Tax Calculator, Tables and Rates", desc: "California personal income tax calculator, tax tables and rates.", url: "https://www.ftb.ca.gov/file/personal/tax-calculator-tables-rates.asp" }
+      { title: "FTB Tax Calculator (2025)", desc: "Official California tax calculator. Enter filing status and CA taxable income (Form 540 line 19). Not for Form 540 2EZ or prior years.", url: "https://webapp.ftb.ca.gov/taxcalc" }
     ]
   },
   {
@@ -173,6 +236,7 @@ const SECTIONS = [
   {
     title: "Tax Research",
     desc: "California returns and Schedule C businesses, in the order we reach for them.",
+    startClosed: true,
     links: [
       { priority: 1,  title: "FTB Forms & Publications",    when: "Every CA return",     url: "https://www.ftb.ca.gov/Forms/" },
       { priority: 2,  title: "FTB Personal Filing",         when: "1040 review",         url: "https://www.ftb.ca.gov/file/personal/" },
@@ -190,7 +254,7 @@ const SECTIONS = [
 
 const $ = (id) => document.getElementById(id);
 let activeCat = "All";
-const collapsed = new Set(); // indexes of sections the user closed
+const collapsed = new Set(SECTIONS.map((s, i) => (s.startClosed ? i : -1)).filter((i) => i >= 0)); // sections folded on load
 
 function hostOf(url) { try { return new URL(url).hostname.replace(/^www\./, ""); } catch (e) { return url; } }
 function esc(s) { return String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c])); }
@@ -276,6 +340,79 @@ $("out").addEventListener("click", (e) => {
   h.setAttribute("aria-expanded", String(!open));
   document.getElementById("sec-" + i).hidden = open;
 });
+
+/* ---------- Add a tool panel: builds the line to paste into SECTIONS ---------- */
+const NEW = "__new__";
+function fillSectionPicker() {
+  $("fSec").innerHTML = SECTIONS.map((s, i) => `<option value="${i}">${esc(s.title)}</option>`).join("") +
+    `<option value="${NEW}">+ New section</option>`;
+  syncAddForm();
+}
+function syncAddForm() {
+  const isNew = $("fSec").value === NEW;
+  $("fNewWrap").hidden = !isNew;
+  if (!isNew) {
+    const ps = SECTIONS[Number($("fSec").value)].links.map((l) => l.priority || 0);
+    const max = Math.max(0, ...ps);
+    $("fPri").placeholder = max ? "Next is " + (max + 1) : "";
+  } else {
+    $("fPri").placeholder = "";
+  }
+}
+function setAddOpen(open) {
+  $("addPanel").hidden = !open;
+  $("addToggle").setAttribute("aria-expanded", String(open));
+  if (open) { fillSectionPicker(); $("fTitle").focus(); }
+}
+function fieldList(o) {
+  const parts = [];
+  if (o.priority) parts.push(`priority: ${o.priority}`);
+  parts.push(`title: ${JSON.stringify(o.title)}`);
+  if (o.when) parts.push(`when: ${JSON.stringify(o.when)}`);
+  if (o.desc) parts.push(`desc: ${JSON.stringify(o.desc)}`);
+  parts.push(`url: ${JSON.stringify(o.url)}`);
+  return parts.join(", ");
+}
+function makeLine() {
+  const err = (m) => { $("fErr").textContent = m; $("fErr").hidden = false; $("fOut").hidden = true; };
+  const title = $("fTitle").value.trim(), url = $("fUrl").value.trim();
+  const when = $("fWhen").value.trim(), desc = $("fDesc").value.trim();
+  const pri = parseInt($("fPri").value, 10);
+  const isNew = $("fSec").value === NEW;
+  const newName = $("fNew").value.trim();
+  if (!title) return err("Add the tool name.");
+  if (!/^https?:\/\/\S+$/i.test(url)) return err("The link should start with https://");
+  if (isNew && !newName) return err("Name the new section.");
+  $("fErr").hidden = true;
+
+  const tool = { priority: pri > 0 ? pri : 0, title, when, desc, url };
+  let code, where;
+  if (isNew) {
+    code = `  {\n    title: ${JSON.stringify(newName)},\n    links: [\n      { ${fieldList(tool)} }\n    ]\n  },`;
+    where = "Paste this block inside the SECTIONS list, between two existing sections. It makes a new section.";
+  } else {
+    const sec = SECTIONS[Number($("fSec").value)];
+    code = `{ ${fieldList(tool)} },`;
+    where = `Paste this line inside the "${sec.title}" links list, next to the other tools in that section.`;
+  }
+  $("fWhere").textContent = where;
+  $("fCode").value = code;
+  $("fCode").rows = isNew ? 6 : 3;
+  $("fOut").hidden = false;
+  if (REPO_EDIT_URL) { $("fGh").href = REPO_EDIT_URL; $("fGh").hidden = false; }
+  $("fCopy").textContent = "Copy";
+}
+$("addToggle").addEventListener("click", () => setAddOpen($("addPanel").hidden));
+$("fClose").addEventListener("click", () => { setAddOpen(false); $("addToggle").focus(); });
+$("fSec").addEventListener("change", syncAddForm);
+$("fMake").addEventListener("click", makeLine);
+$("fCopy").addEventListener("click", async () => {
+  const box = $("fCode");
+  try { await navigator.clipboard.writeText(box.value); }
+  catch (e) { box.select(); try { document.execCommand("copy"); } catch (e2) {} }
+  $("fCopy").textContent = "Copied";
+});
+
 $("q").addEventListener("input", render);
 document.addEventListener("keydown", (e) => {
   if (e.key === "/" && document.activeElement !== $("q")) { e.preventDefault(); $("q").focus(); }
