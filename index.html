@@ -79,6 +79,16 @@
   :root[data-theme="dark"] .err { color: #ff8a80; }
   @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .err { color: #ff8a80; } }
 
+  .hub { display: inline-block; margin-bottom: 12px; font-weight: 700; font-size: 0.9rem; color: var(--accent); text-decoration: none; border: 2px solid var(--line); border-radius: 999px; padding: 4px 14px; background: var(--panel); }
+  .hub:hover { border-color: var(--accent); }
+  .hub[hidden] { display: none; }
+
+  .tip-wrap { position: relative; flex: none; display: flex; align-items: center; }
+  .info { width: 30px; height: 30px; border-radius: 50%; border: 2px solid var(--line); background: var(--panel); color: var(--muted); font: 700 0.9rem var(--font); cursor: help; }
+  .info:hover, .info:focus-visible { border-color: var(--accent); color: var(--accent); }
+  .tip { display: none; position: absolute; right: 0; top: calc(100% + 8px); width: 270px; z-index: 5; background: var(--ink); color: var(--bg); font-size: 0.85rem; line-height: 1.4; padding: 10px 12px; border-radius: 10px; }
+  .tip-wrap:hover .tip, .tip-wrap:focus-within .tip { display: block; }
+
   .filters { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 22px; }
   .chip { font: 500 0.95rem var(--font); color: var(--ink); cursor: pointer; background: var(--panel); border: 2px solid var(--line); border-radius: 999px; padding: 6px 14px; }
   .chip:hover { border-color: var(--accent); }
@@ -109,13 +119,16 @@
   .inside { list-style: none; margin: 0; padding: 0; }
   .inside li { border-top: 1px solid var(--line); }
   .inside { background: var(--bg); }
-  .slot { display: grid; grid-template-columns: 34px 1fr auto; align-items: center; gap: 12px; padding: 12px 18px; text-decoration: none; background: var(--panel); }
+  .slot { display: grid; grid-template-columns: 34px 34px 1fr auto; align-items: center; gap: 12px; padding: 12px 18px; text-decoration: none; background: var(--panel); }
   .slot:hover { background: var(--accent-soft); }
   .rank { width: 30px; height: 30px; border-radius: 50%; display: grid; place-items: center; font-weight: 800; font-size: 0.9rem; border: 2px solid var(--accent); color: var(--accent); }
   .rank.plain { border-color: var(--line); color: var(--muted); }
   .slot .t { font-weight: 700; line-height: 1.25; }
   .slot:hover .t { text-decoration: underline; }
   .slot .d { display: block; color: var(--muted); font-size: 0.9rem; }
+  .logo { width: 30px; height: 30px; border-radius: 7px; background: #fff; border: 1px solid var(--line); object-fit: contain; padding: 2px; }
+  .slot .host { display: inline-block; margin-top: 2px; color: var(--accent); font-weight: 700; font-size: 0.82rem; }
+  .meta { display: block; color: var(--muted); font-size: 0.8rem; margin-top: 2px; }
   .when { font-size: 0.85rem; font-weight: 500; color: var(--ink); background: var(--bg); border: 1px solid var(--line); border-radius: 999px; padding: 3px 12px; white-space: nowrap; }
 
   .empty { text-align: center; color: var(--muted); padding: 40px 12px; border: 2px dashed var(--line); border-radius: 14px; }
@@ -124,8 +137,8 @@
   .theme { font: inherit; color: var(--muted); background: none; border: 1px solid var(--line); border-radius: 8px; padding: 4px 12px; cursor: pointer; }
 
   @media (max-width: 560px) {
-    .slot { grid-template-columns: 34px 1fr; }
-    .when { grid-column: 2; justify-self: start; white-space: normal; }
+    .slot { grid-template-columns: 34px 34px 1fr; }
+    .when { grid-column: 3; justify-self: start; white-space: normal; }
     .count { display: none; }
   }
   @media (prefers-reduced-motion: no-preference) {
@@ -138,6 +151,7 @@
 <div class="shell">
   <header>
     <div>
+      <a class="hub" id="hubLink" hidden>&larr; Back to TaxAce Tracker Hub</a>
       <h1>Reviewers Tool Box</h1>
       <p class="sub">Every outside tool and link the team uses for tax prep and review, in one place.</p>
     </div>
@@ -147,13 +161,18 @@
         <kbd aria-hidden="true">/</kbd>
       </div>
       <button class="add-btn" id="addToggle" type="button" aria-expanded="false" aria-controls="addPanel">+ Add a tool</button>
+      <span class="tip-wrap">
+        <button class="info" type="button" aria-label="How adding a tool works" aria-describedby="addTip">i</button>
+        <span class="tip" id="addTip" role="tooltip">Fill in the form to get one line of code. Paste it into index.html on GitHub and commit. Nothing is saved until you commit, then everyone sees it.</span>
+      </span>
     </div>
   </header>
 
   <section class="add" id="addPanel" hidden aria-label="Add a tool">
     <h2>Add a tool</h2>
-    <p class="hint">Fill this in, copy the line it makes, and paste it into <code>index.html</code> on GitHub. After you commit, the page updates for everyone.</p>
+    <p class="hint">Fill this in, copy the line it makes, and paste it into <code>index.html</code> on GitHub. The line records your name and today's date. After you commit, the page updates for everyone, and GitHub keeps the history of who changed what.</p>
     <div class="fields">
+      <label>Your name * (who is adding this)<input id="fBy" autocomplete="off"></label>
       <label>Tool name *<input id="fTitle" autocomplete="off"></label>
       <label>Link *<input id="fUrl" type="url" placeholder="https://" autocomplete="off"></label>
       <label>Section<select id="fSec"></select></label>
@@ -194,6 +213,8 @@
      when:     short note on when to use it (optional)
      desc:     one line about what it is (optional)
      priority: number, 1 is used first (optional)
+     by:       who added it (the Add a tool panel fills this in)
+     added:    date it was added, like "2026-10-27" (the panel fills this in)
 
    startClosed: true  (on a section with 2+ tools) keeps it folded when the page opens.
 
@@ -204,33 +225,45 @@
    can open it for you. Example: https://github.com/YOUR-ORG/YOUR-REPO/edit/main/index.html */
 const REPO_EDIT_URL = "";
 
+/* Optional: the web address of the TaxAce Tracker Hub. When set, a
+   "Back to Tracker Hub" button shows at the top of the page. */
+const HUB_URL = "";
+
 const SECTIONS = [
   {
     title: "California Tax (FTB)",
     desc: "California income tax calculator.",
     links: [
-      { title: "FTB Tax Calculator (2025)", desc: "Official California tax calculator. Enter filing status and CA taxable income (Form 540 line 19). Not for Form 540 2EZ or prior years.", url: "https://webapp.ftb.ca.gov/taxcalc" }
+      { title: "FTB Tax Calculator (2025)", desc: "Official California tax calculator. Enter filing status and CA taxable income (Form 540 line 19). Not for Form 540 2EZ or prior years.", by: "Vena", url: "https://webapp.ftb.ca.gov/taxcalc" }
     ]
   },
   {
     title: "Vehicles & DMV",
     desc: "Vehicle registration and license fee lookups.",
     links: [
-      { title: "California DMV Vehicle License Fee Calculator", desc: "Estimate the VLF and registration fees for a California vehicle.", url: "https://www.dmv.ca.gov/wasapp/FeeCalculatorWeb/vlfForm.do?csrt=14926755158816426428" }
+      { title: "California DMV Vehicle License Fee Calculator", desc: "Estimate the VLF and registration fees for a California vehicle.", by: "Vena", url: "https://www.dmv.ca.gov/wasapp/FeeCalculatorWeb/vlfForm.do?csrt=14926755158816426428" }
     ]
   },
   {
     title: "Forms & Decoders",
     desc: "Help reading tax forms and their codes.",
     links: [
-      { title: "Form 1095 Decoder", desc: "Decode the codes on Form 1095-A, B and C.", url: "https://www.mytaxform.com/form-1095-decoder/" }
+      { title: "Form 1095 Decoder", desc: "Decode the codes on Form 1095-A, B and C.", by: "Vena", url: "https://www.mytaxform.com/form-1095-decoder/" },
+      { title: "Form 1095-C Line 14 and 16 Code Sheet", desc: "Code sheet for reading Form 1095-B and 1095-C. Suggested by a tester.", by: "Vena", added: "2026-10-27", url: "https://www.taxbandits.com/aca-forms/form-1095-c-line-14-16-codesheet/" }
     ]
   },
   {
     title: "Currency",
     desc: "Official exchange rates for foreign income and expenses.",
     links: [
-      { title: "Treasury Currency Exchange Rates Converter", desc: "Official Treasury exchange rates for foreign currency amounts.", url: "https://fiscaldata.treasury.gov/currency-exchange-rates-converter/" }
+      { title: "Treasury Currency Exchange Rates Converter", desc: "Official Treasury exchange rates for foreign currency amounts.", by: "Vena", url: "https://fiscaldata.treasury.gov/currency-exchange-rates-converter/" }
+    ]
+  },
+  {
+    title: "Property Tax",
+    desc: "County tax collector lookups. More counties and states to come.",
+    links: [
+      { title: "Solano County Property Tax Lookup", desc: "Search Solano County secured and unsecured property tax records.", by: "Vena", added: "2026-10-27", url: "https://ca-solano.publicaccessnow.com/TaxCollector/TaxSearch.aspx" }
     ]
   },
   {
@@ -238,16 +271,16 @@ const SECTIONS = [
     desc: "California returns and Schedule C businesses, in the order we reach for them.",
     startClosed: true,
     links: [
-      { priority: 1,  title: "FTB Forms & Publications",    when: "Every CA return",     url: "https://www.ftb.ca.gov/Forms/" },
-      { priority: 2,  title: "FTB Personal Filing",         when: "1040 review",         url: "https://www.ftb.ca.gov/file/personal/" },
-      { priority: 3,  title: "FTB Personal Credits",        when: "Find missed credits", url: "https://www.ftb.ca.gov/file/personal/credits/index.html" },
-      { priority: 4,  title: "Schedule CA Instructions",    when: "CA adjustments",      url: "https://www.ftb.ca.gov/forms/2025/2025-540-ca-instructions.html" },
-      { priority: 5,  title: "IRS Schedule C Instructions", when: "Schedule C",          url: "https://www.irs.gov/instructions/i1040sc" },
-      { priority: 6,  title: "IRS Publication 334",         when: "Business deductions", url: "https://www.irs.gov/publications/p334" },
-      { priority: 7,  title: "IRS Publication 463",         when: "Vehicle / travel",    url: "https://www.irs.gov/publications/p463" },
-      { priority: 8,  title: "IRS Publication 587",         when: "Home office",         url: "https://www.irs.gov/publications/p587" },
-      { priority: 9,  title: "IRS Publication 946",         when: "Depreciation",        url: "https://www.irs.gov/publications/p946" },
-      { priority: 10, title: "FTB PTET",                    when: "S-corp / 1065",       url: "https://www.ftb.ca.gov/file/business/credits/pass-through-entity-elective-tax/" }
+      { priority: 1,  title: "FTB Forms & Publications",    when: "Every CA return",     by: "Vena", url: "https://www.ftb.ca.gov/Forms/" },
+      { priority: 2,  title: "FTB Personal Filing",         when: "1040 review",         by: "Vena", url: "https://www.ftb.ca.gov/file/personal/" },
+      { priority: 3,  title: "FTB Personal Credits",        when: "Find missed credits", by: "Vena", url: "https://www.ftb.ca.gov/file/personal/credits/index.html" },
+      { priority: 4,  title: "Schedule CA Instructions",    when: "CA adjustments",      by: "Vena", url: "https://www.ftb.ca.gov/forms/2025/2025-540-ca-instructions.html" },
+      { priority: 5,  title: "IRS Schedule C Instructions", when: "Schedule C",          by: "Vena", url: "https://www.irs.gov/instructions/i1040sc" },
+      { priority: 6,  title: "IRS Publication 334",         when: "Business deductions", by: "Vena", url: "https://www.irs.gov/publications/p334" },
+      { priority: 7,  title: "IRS Publication 463",         when: "Vehicle / travel",    by: "Vena", url: "https://www.irs.gov/publications/p463" },
+      { priority: 8,  title: "IRS Publication 587",         when: "Home office",         by: "Vena", url: "https://www.irs.gov/publications/p587" },
+      { priority: 9,  title: "IRS Publication 946",         when: "Depreciation",        by: "Vena", url: "https://www.irs.gov/publications/p946" },
+      { priority: 10, title: "FTB PTET",                    when: "S-corp / 1065",       by: "Vena", url: "https://www.ftb.ca.gov/file/business/credits/pass-through-entity-elective-tax/" }
     ]
   }
 ];
@@ -258,7 +291,16 @@ const collapsed = new Set(SECTIONS.map((s, i) => (s.startClosed ? i : -1)).filte
 
 function hostOf(url) { try { return new URL(url).hostname.replace(/^www\./, ""); } catch (e) { return url; } }
 function esc(s) { return String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c])); }
-function linkText(l, sec) { return (l.title + " " + (l.when || "") + " " + (l.desc || "") + " " + sec.title + " " + hostOf(l.url)).toLowerCase(); }
+function linkText(l, sec) { return (l.title + " " + (l.when || "") + " " + (l.desc || "") + " " + (l.by || "") + " " + sec.title + " " + hostOf(l.url)).toLowerCase(); }
+function fmtDate(iso) {
+  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(iso || "");
+  if (!m) return iso || "";
+  return new Date(+m[1], +m[2] - 1, +m[3]).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+}
+function todayISO() {
+  const d = new Date(), p = (n) => String(n).padStart(2, "0");
+  return d.getFullYear() + "-" + p(d.getMonth() + 1) + "-" + p(d.getDate());
+}
 
 function renderFilters() {
   const total = SECTIONS.reduce((n, s) => n + s.links.length, 0);
@@ -296,10 +338,12 @@ function render() {
           <li>
             <a class="slot" href="${esc(l.url)}" target="_blank" rel="noopener noreferrer">
               <span class="rank ${l.priority ? "" : "plain"}" ${l.priority ? `aria-label="Priority ${l.priority}"` : 'aria-hidden="true"'}>${l.priority ? esc(l.priority) : "&#8599;"}</span>
+              <img class="logo" src="https://www.google.com/s2/favicons?domain=${esc(hostOf(l.url))}&amp;sz=64" alt="" width="30" height="30" loading="lazy" onerror="this.style.visibility='hidden'">
               <span>
                 <span class="t">${esc(l.title)}</span>
                 ${l.desc ? `<span class="d">${esc(l.desc)}</span>` : ""}
                 <span class="host">${esc(hostOf(l.url))}</span>
+                ${(l.by || l.added) ? `<span class="meta">Added${l.by ? " by " + esc(l.by) : ""}${l.added ? " on " + esc(fmtDate(l.added)) : ""}</span>` : ""}
               </span>
               ${l.when ? `<span class="when">${esc(l.when)}</span>` : ""}
             </a>
@@ -319,7 +363,9 @@ function render() {
          </div>
          ${blocks}
        </section>`
-    : `<div class="empty">No tools match "${esc($("q").value)}". Try a shorter word or pick All.</div>`;
+    : (total === 0
+        ? `<div class="empty">No tools added yet. Click "+ Add a tool" to get started.</div>`
+        : `<div class="empty">No tools match "${esc($("q").value)}". Try a shorter word or pick All.</div>`);
 
   $("count").textContent = `${shown} of ${total} tools shown`;
 }
@@ -370,22 +416,26 @@ function fieldList(o) {
   parts.push(`title: ${JSON.stringify(o.title)}`);
   if (o.when) parts.push(`when: ${JSON.stringify(o.when)}`);
   if (o.desc) parts.push(`desc: ${JSON.stringify(o.desc)}`);
+  if (o.by) parts.push(`by: ${JSON.stringify(o.by)}`);
+  if (o.added) parts.push(`added: ${JSON.stringify(o.added)}`);
   parts.push(`url: ${JSON.stringify(o.url)}`);
   return parts.join(", ");
 }
 function makeLine() {
   const err = (m) => { $("fErr").textContent = m; $("fErr").hidden = false; $("fOut").hidden = true; };
+  const by = $("fBy").value.trim();
   const title = $("fTitle").value.trim(), url = $("fUrl").value.trim();
   const when = $("fWhen").value.trim(), desc = $("fDesc").value.trim();
   const pri = parseInt($("fPri").value, 10);
   const isNew = $("fSec").value === NEW;
   const newName = $("fNew").value.trim();
+  if (!by) return err("Add your name so the team knows who added it.");
   if (!title) return err("Add the tool name.");
   if (!/^https?:\/\/\S+$/i.test(url)) return err("The link should start with https://");
   if (isNew && !newName) return err("Name the new section.");
   $("fErr").hidden = true;
 
-  const tool = { priority: pri > 0 ? pri : 0, title, when, desc, url };
+  const tool = { priority: pri > 0 ? pri : 0, title, when, desc, by, added: todayISO(), url };
   let code, where;
   if (isNew) {
     code = `  {\n    title: ${JSON.stringify(newName)},\n    links: [\n      { ${fieldList(tool)} }\n    ]\n  },`;
@@ -426,6 +476,8 @@ $("theme").addEventListener("click", () => {
   try { localStorage.setItem("rtb-theme", root.dataset.theme); } catch (e) {}
 });
 try { const t = localStorage.getItem("rtb-theme"); if (t) document.documentElement.dataset.theme = t; } catch (e) {}
+
+if (HUB_URL) { $("hubLink").href = HUB_URL; $("hubLink").hidden = false; }
 
 renderFilters();
 render();
